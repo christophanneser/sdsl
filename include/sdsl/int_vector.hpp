@@ -59,6 +59,12 @@ typedef uint64_t std_size_type_for_int_vector;
 template<uint8_t t_width=0>
 class int_vector;
 
+template<uint8_t t_width=0>
+class int_vector_wrapper : public int_vector<t_width> {
+    public:
+        int_vector_wrapper(size_t size, void* data, uint8_t int_width = t_width);
+};
+
 template<class int_vector_type>
 class mm_item;
 
@@ -340,10 +346,8 @@ class int_vector
                    uint8_t int_width = t_width);
 
         // Custom wrapper initializer
-        int_vector(size_type size, value_type default_value, void* data,
+        int_vector(size_type size, size_t reserved_bytes, void* data,
                    uint8_t int_width = t_width);
-
-
 
         //! Constructor to fix possible comparison with integeres issue.
         explicit int_vector(size_type size = 0) : int_vector(size, static_cast<value_type>(0), t_width) {
@@ -1254,6 +1258,12 @@ operator<<(std::ostream& os, const t_bv& bv)
 // ==== int_vector implementation  ====
 
 template<uint8_t t_width>
+inline int_vector_wrapper<t_width>::int_vector_wrapper(size_t size, void* data, uint8_t intWidth):
+    int_vector<t_width>(size, 0ULL, data, intWidth){
+        this->m_wrapper = true;
+}
+
+template<uint8_t t_width>
 inline int_vector<t_width>::int_vector(size_type size, value_type default_value, uint8_t intWidth):
     m_size(0), m_data(nullptr), m_width(t_width)
 {
@@ -1264,10 +1274,11 @@ inline int_vector<t_width>::int_vector(size_type size, value_type default_value,
 
 
 template<uint8_t t_width>
-inline int_vector<t_width>::int_vector(size_type size, value_type default_value, void* data, uint8_t intWidth):
+inline int_vector<t_width>::int_vector(size_type size, size_t reserved_bytes, void* data, uint8_t intWidth):
     m_size(size), m_data(reinterpret_cast<uint64_t*>(data)), m_width(t_width)
 {
-    // use int vector as wrapper only with preexisting data
+    // use int vector as wrapper only for already existing succinct data
+    m_size = intWidth * size;
     width(intWidth);
 }
 
