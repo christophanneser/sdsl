@@ -1260,7 +1260,6 @@ operator<<(std::ostream& os, const t_bv& bv)
 template<uint8_t t_width>
 inline int_vector_wrapper<t_width>::int_vector_wrapper(size_t size, void* data, uint8_t intWidth):
     int_vector<t_width>(size, 0ULL, data, intWidth){
-        this->m_wrapper = true;
 }
 
 template<uint8_t t_width>
@@ -1277,7 +1276,8 @@ template<uint8_t t_width>
 inline int_vector<t_width>::int_vector(size_type size, size_t reserved_bytes, void* data, uint8_t intWidth):
     m_size(size), m_data(reinterpret_cast<uint64_t*>(data)), m_width(t_width)
 {
-    // use int vector as wrapper only for already existing succinct data
+    // use int vector as wrapper only for already existing succinctly encoded data
+    this->m_wrapper = true;
     m_size = intWidth * size;
     width(intWidth);
 }
